@@ -1,9 +1,32 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+
+
 
 class Program
 {
+        
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello Develop02 World!");
+        PromptGenerator question = new PromptGenerator();
+        Entry entry = new Entry();
+        Journal journal = new Journal()
+        
+        
+        entry.Diplay();
+        
     }
+
+        
+
 }
+
+
+
+    
+
+    
+
+
+
