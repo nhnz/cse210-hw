@@ -1,86 +1,134 @@
-using System.Diagnostics;
-// created class Journal
-class Journal
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using static System.Console;
+using System.Threading;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+
+
+
+public class Journal
 {
-    //A list for the entries
-    public List<Entry> entries = new List<Entry>();
-    public static readonly string[] prompts = 
-    {
-        "Who was the most interesting person I interacted with today?",
-        "What was the best part of my day?",
-        "How did I see the hand of the Lord in my life today?",
-        "What was the strongest emotion I felt today?",
-        "If I had one thing I could do over today, what would it be?"
-    };
-//Allow user to record in the Journal
-    public void JournalEntry()
-    {
-        Random recordings = new Random();
-        string prompt = prompts[recordings.Next(prompts.Length)];
-        Console.WriteLine($"\nPrompt: {prompt}");
-        Console.Write("Your Response: ");
-        string response = Console.ReadLine();
-        string date = DateTime.Now.ToString("yyyy-MM-dd");
+    
+    string path = @"C:\Users\nhlak\Documents\cse210-hw\cse210-hw\prove\Develop02\MyJournal.txt";
+    //A list to hold defined prompt
+    public List<Entry> _entries = new List<Entry>();
 
-        entries.Add(new Entry(date, prompt, response));
-        Console.WriteLine("Entry saved!");
-    }
-    //Display contect of the Journal
-    public void DisplayJournalEntries()
+    //Add a new entry to the journal
+    public void AddEntry(Entry newEntry)
     {
-        Console.WriteLine("\nJournal Entries:");
-        foreach (var entry in entries)
         {
-            Console.WriteLine(entry);
+            _entries.Add(newEntry);
         }
     }
-    // Save Journal Content to files
-    public void SaveToFile()
-    {
-        Console.Write("Enter filename to save: ");
-        string filename = Console.ReadLine();
 
-        using (StreamWriter writer = new StreamWriter(filename))
-        {
-            foreach (var entry in entries)
-            {
-                writer.WriteLine($"{entry.Date}|{entry.Prompt}|{entry.Response}");
-            }
-        }
-        Console.WriteLine("Journal saved successfully!");
-    }
-    //Load Journal from the file you save in 
 
-    public void LoadFromFile()
+    //Display all entries in the journal
+
+    public void DisplayAll()
     {
-        Console.Write("Enter filename to load: ");
-        string filename = Console.ReadLine();
-        
-        if (File.Exists(filename))
+        if (_entries.Count == 0)
         {
-            entries.Clear();
-            using (StreamReader reader = new StreamReader(filename))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    var parts = line.Split('|');
-                    if (parts.Length == 3)
-                    {
-                        entries.Add(new Entry(parts[0], parts[1], parts[2]));
-                    }
-                }
-            }
-            Console.WriteLine("Journal loaded successfully!");
+            ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\nNo entries in the Journal.\n");
+            ForegroundColor = ConsoleColor.White;
         }
         else
         {
-            Console.WriteLine("File not found.");
+            foreach (Entry entry in _entries)
+            {
+                ForegroundColor = ConsoleColor.DarkMagenta;
+                entry.Display();
+                ForegroundColor = ConsoleColor.White;
+            }
         }
     }
 
-    private string GetDebuggerDisplay()
+
+
+    // Create and save text in journal text filr.
+    public void SaveToFile()
     {
-        return ToString();
+        //create a text file 
+        //string path = @"C:\Users\nhlak\Documents\cse210-hw\cse210-hw\prove\Develop02\MyJournal.txt";
+                  
+            //Check if file exits
+            if (!File.Exists(path))
+
+            //if does not exist create one on the path provided
+            {
+                using (StreamWriter writer = File.CreateText(path))
+                {
+                    //Enter text on the file created
+                    foreach (var entry in _entries)
+                    {
+                        writer.WriteLine($"{entry._date} | {entry._promptText} | {entry._entryText}");
+                        break;
+                    }
+                }
+            } 
+
+            //when is created append all jornal text in this file
+            if (File.Exists(path))
+            {
+                // first clear the previous text
+                ClearFile();
+                //Append all text of the journal
+                foreach (var entry in _entries)
+                    {
+                        File.AppendAllText(path, $"\nEntry: \n{entry._date} | {entry._promptText} | {entry._entryText}");
+                        
+                    }    
+            }
+            
+
+        ForegroundColor = ConsoleColor.DarkMagenta;
+        Console.WriteLine($"Journal saved to MyJournal text file under the path: {path}");
+        ForegroundColor = ConsoleColor.White;
+    }
+
+
+     
+     //Load the saved journal from file.
+    public void LoadFromFile()
+    {
+         
+        //string path = @"C:\Users\nhlak\Documents\cse210-hw\cse210-hw\prove\Develop02\MyJournal.txt";
+        
+        if (File.Exists(path))
+            {
+                using(StreamReader reader = File.OpenText(path))
+                {
+                
+                    string file;
+                    
+                    while ((file =reader.ReadLine())!=null)
+                    {
+                        ForegroundColor = ConsoleColor.DarkYellow;
+                        Console.WriteLine(file);
+                        ForegroundColor = ConsoleColor.White;
+
+                    }
+                }
+            
+            }
+    }        
+    
+    //clear file
+    public void ClearFile()
+    {
+        File.WriteAllText(path,"");
+        WaitForKey();
+    }
+
+    //press any key to carry on
+    public void WaitForKey()
+    {
+        ForegroundColor = ConsoleColor.DarkGray;
+        WriteLine("\nPress any key.........");
+        ForegroundColor = ConsoleColor.White;
+        ReadKey(true);
     }
 }
