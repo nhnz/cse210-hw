@@ -15,6 +15,11 @@ class Program
         Journal theJournal = new Journal();                            
         PromptGenerator promptGenerator = new PromptGenerator();       
         
+        // Set the file path
+        Console.Write("Enter the path to save/load your journal file: ");
+        string filePath = Console.ReadLine();
+        theJournal.SetFilePath(filePath);
+        
         //menu user will choose from
         while (true)
         {
@@ -63,7 +68,7 @@ class Program
 
                 case "5":
                     //Clear Journal
-                    theJournal.ClearFile();
+                    theJournal.ClearEntries();
                     ForegroundColor = ConsoleColor.DarkBlue;
                     Console.WriteLine("===========\nJournal is empty you can start afresh adding text\n==========");
                     ForegroundColor = ConsoleColor.White;

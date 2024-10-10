@@ -11,10 +11,14 @@ using System.Security.Cryptography.X509Certificates;
 
 public class Journal
 {
-    
-    string path = @"C:\Users\nhlak\Documents\cse210-hw\cse210-hw\prove\Develop02\MyJournal.txt";
+    private string path;
     //A list to hold defined prompt
     public List<Entry> _entries = new List<Entry>();
+
+    public void SetFilePath(string filePath)
+    {
+        path = filePath;
+    }
 
     //Add a new entry to the journal
     public void AddEntry(Entry newEntry)
@@ -48,78 +52,81 @@ public class Journal
 
 
 
-    // Create and save text in journal text filr.
-    public void SaveToFile()
+    // Create and save text in journal text file.
+  public void SaveToFile()
     {
-        //create a text file 
-        //string path = @"C:\Users\nhlak\Documents\cse210-hw\cse210-hw\prove\Develop02\MyJournal.txt";
-                  
-            //Check if file exits
-            if (!File.Exists(path))
+        if (string.IsNullOrEmpty(path))
+        {
+            Console.WriteLine("No file path specified. Please set a path first.");
+            return;
+        }
 
-            //if does not exist create one on the path provided
+        try
+        {
+            using (StreamWriter writer = new StreamWriter(path, false))
             {
-                using (StreamWriter writer = File.CreateText(path))
-                {
-                    //Enter text on the file created
-                    foreach (var entry in _entries)
-                    {
-                        writer.WriteLine($"{entry._date} | {entry._promptText} | {entry._entryText}");
-                        break;
-                    }
-                }
-            } 
-
-            //when is created append all jornal text in this file
-            if (File.Exists(path))
-            {
-                // first clear the previous text
-                ClearFile();
-                //Append all text of the journal
                 foreach (var entry in _entries)
-                    {
-                        File.AppendAllText(path, $"\nEntry: \n{entry._date} | {entry._promptText} | {entry._entryText}");
-                        
-                    }    
+                {
+                    writer.WriteLine($"{entry._date} | {entry._promptText} | {entry._entryText}");
+                }
             }
-            
-
-        ForegroundColor = ConsoleColor.DarkMagenta;
-        Console.WriteLine($"Journal saved to MyJournal text file under the path: {path}");
-        ForegroundColor = ConsoleColor.White;
+            ForegroundColor = ConsoleColor.DarkMagenta;
+            Console.WriteLine($"Journal saved to: {path}");
+            ResetColor();
+        }
+        catch (Exception ex)
+        {
+            ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Error saving journal: {ex.Message}");
+            ResetColor();
+        }
     }
 
-
-     
-     //Load the saved journal from file.
     public void LoadFromFile()
     {
-         
-        //string path = @"C:\Users\nhlak\Documents\cse210-hw\cse210-hw\prove\Develop02\MyJournal.txt";
-        
-        if (File.Exists(path))
-            {
-                using(StreamReader reader = File.OpenText(path))
-                {
-                
-                    string file;
-                    
-                    while ((file =reader.ReadLine())!=null)
-                    {
-                        ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.WriteLine(file);
-                        ForegroundColor = ConsoleColor.White;
+        if (string.IsNullOrEmpty(path))
+        {
+            Console.WriteLine("No file path specified. Please set a path first.");
+            return;
+        }
 
+        if (File.Exists(path))
+        {
+            _entries.Clear(); // Clear existing entries
+            using (StreamReader reader = File.OpenText(path))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    var parts = line.Split('|');
+                    if (parts.Length == 3)
+                    {
+                        var entry = new Entry(parts[1].Trim(), parts[2].Trim())
+                        {
+                            _date = parts[0].Trim()
+                        };
+                        _entries.Add(entry);
+                        
                     }
                 }
-            
             }
-    }        
-    
-    //clear file
-    public void ClearFile()
+            ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"Journal loaded from: {path}");
+            
+            ResetColor();
+        }
+        else
+        {
+            ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine("File does not exist.");
+            ResetColor();
+        }
+    }
+
+    public void ClearEntries()
     {
-        File.WriteAllText(path,"");
+        _entries.Clear();
+        Console.WriteLine("All entries cleared.");
         WaitForKey();
     }
 
